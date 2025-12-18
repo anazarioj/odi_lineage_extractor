@@ -9,3 +9,11 @@ Abrir la carpeta odi_lineage_extractor con el IDE de su preferencia
 
 git checkout -b feature/anazarioj
 
+... Sesión de trabajo...
+
+git add .
+git commit -m "mi mensaje"
+git push origin feature/anazarioj
+
+... 
+
