@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./extractor/backend
+      dockerfile: Dockerfile
+    container_name: extractor-odi-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./extractor/backend:/app
+      - backend-cache:/root/.cache
+    environment:
+      - PYTHONUNBUFFERED=1
+      - WATCHFILES_FORCE_POLLING=true
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - extractor-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./extractor/frontend
+      dockerfile: Dockerfile
+    container_name: extractor-odi-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./extractor/frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    networks:
+      - extractor-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+networks:
+  extractor-network:
+    driver: bridge
+
+volumes:
+  backend-cache:
