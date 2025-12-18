@@ -1,53 +1,57 @@
-# Extractor Project
+# Oracle Lineage AI (Extractor)
 
-Proyecto con arquitectura de microservicios usando Docker Compose.
+Proyecto con arquitectura Docker Compose que incluye un backend FastAPI y un frontend Next.js para extraer inventario Oracle/ODI, visualizar linaje y planificar migración.
 
 ## Estructura
 
-- **Backend**: FastAPI con Python 3.13
-- **Frontend**: Next.js con React 18 y Material-UI
+- Backend: FastAPI (Python 3.13) en `extractor/backend`
+- Frontend: Next.js + React + MUI en `extractor/frontend`
+- Orquestación: `docker-compose.yml` en la raíz del repositorio
 
-## Requisitos
+## Tecnologías y versiones
 
-- Docker
-- Docker Compose
+- Backend: FastAPI, Uvicorn, SQLGlot, Google Generative AI (Gemini), OpenAI SDK, Azure Identity
+- Frontend: Node.js 22 LTS, Next.js 15, React 19, Material-UI 6, TypeScript 5.7
 
 ## Inicio rápido
 
-1. Clonar el repositorio y navegar a la carpeta extractor:
+1) Variables de entorno del backend
 ```bash
-cd extractor
+cp extractor/backend/.env.example extractor/backend/.env
+# Edita extractor/backend/.env con tus credenciales
 ```
 
-2. Copiar el archivo de variables de entorno:
-```bash
-cp backend/.env.example backend/.env
-```
-
-3. Editar `backend/.env` con tus credenciales.
-
-4. Levantar los contenedores:
+2) Levantar servicios
 ```bash
 docker-compose up --build
 ```
 
-Los servicios estarán disponibles en:
+Servicios:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
-- Backend API Docs: http://localhost:8000/docs
+- API Docs: http://localhost:8000/docs
+
+## Flujo funcional (UI)
+
+Páginas principales del frontend:
+- Configuración (/): Conexión a DB Oracle y DB ODI (Oracle) + selección de LLM
+- Inventario (/inventory): Tabs para Tablas, Vistas, Stored Procedures, Funciones y Paquetes
+- Diccionario (/dictionary): Tabla de metadata de campos (tipo, longitud, nullable, descripción)
+- Linaje (/lineage): Búsqueda de objeto/campo y área para el grafo de linaje
+- Migración (/migration): Selección de objetos y visualización del plan de migración
+- Dashboard (/dashboard): Estado general y pruebas básicas
+
+Nota: Estas páginas están estructuradas sin lógica de negocio aún; se integrarán paso a paso.
 
 ## Desarrollo
 
-### Hot Reload
+Hot Reload habilitado:
+- Cambios en `extractor/backend` recargan Uvicorn automáticamente
+- Cambios en `extractor/frontend` recargan Next.js con polling en Docker
 
-Ambos servicios tienen hot reload habilitado:
-- Los cambios en `backend/` se reflejan automáticamente
-- Los cambios en `frontend/` se reflejan automáticamente
-
-### Comandos útiles
-
+Comandos útiles:
 ```bash
-# Levantar servicios
+# Levantar en primer plano
 docker-compose up
 
 # Levantar en background
@@ -66,29 +70,13 @@ docker-compose down
 # Reconstruir contenedores
 docker-compose up --build
 
-# Ejecutar comandos en el backend
-docker-compose exec backend python manage.py <comando>
-
-# Ejecutar comandos en el frontend
-docker-compose exec frontend npm <comando>
+# Ejecutar comandos dentro de contenedores
+docker-compose exec backend sh -c "python -V"
+docker-compose exec frontend npm run dev
 ```
-
-## Dependencias
-
-### Backend
-- FastAPI
-- SQLGlot
-- Google Generative AI (Gemini)
-- OpenAI (Azure)
-- Uvicorn
-
-### Frontend
-- Next.js 14
-- React 18
-- Material-UI 5
-- TypeScript
 
 ## Notas
 
-- `node_modules` no se monta en el contenedor para mejorar el rendimiento
-- Los volúmenes están configurados para persistir cache y optimizar rebuilds
+- `node_modules` NO se monta en el contenedor; se usan volúmenes internos para mejor rendimiento
+- `NEXT_PUBLIC_API_URL` ya está configurado en docker-compose para apuntar al backend
+- CORS del backend permite requests desde `http://localhost:3000`
